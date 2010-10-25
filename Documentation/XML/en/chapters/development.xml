@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xml:id="chapter.development"
+	 xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:xhtml="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     xmlns:ns="http://docbook.org/ns/docbook"
+     xmlns:mathml="http://www.w3.org/1998/Math/MathML">
+
+	<title>Development</title>
+	
+	<section xml:id="chapter.development.basics">
+		<title>Basics</title>
+		<para>
+			You need to create a class implementing the <interfacename>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;Interface</interfacename> 
+			in order to link it to the sitemap generator. There are four methods that need to be implemented:
+			<variablelist>
+				<varlistentry>
+					<term><literal>init($conf, $parent, $cObj = null)</literal></term>
+					<listitem>
+						<para>
+							This method is called before fetching the first item.
+							So here you might develop a database connection, fetch your results or initialize variables.
+						</para>
+						<para>
+							There are three parameters given:
+							 <variablelist>
+								<varlistentry>
+									<term><literal>$conf</literal></term>
+									<listitem>
+										<para>
+											An array with configuration for the generator. It is a php-transformation of the
+											configuration options set via TypoScript.  
+										 </para>
+									</listitem>
+								</varlistentry>
+								<varlistentry>
+									<term><literal>$parent</literal></term>
+									<listitem>
+										<para>
+											A link back to the calling class. Most notable is the <methodsynopsis><methodname>throwError</methodname>(<methodparam>$code</methodparam>, <methodparam>$message = null</methodparam>)</methodsynopsis> method.
+											If something goes wrong use this to throw a HTTP Status Code and a message.
+										</para>
+									</listitem>
+								</varlistentry>
+								<varlistentry>
+									<term><literal>$cObj</literal></term>
+									<listitem>
+										<para>
+											A reference to a cObject you might use to generate links.
+										</para>
+									</listitem>
+								</varlistentry>
+							</variablelist>
+						</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>finish()</literal></term>
+					<listitem>
+						<para>
+							This method is called after fetching the items.
+							Close your database connection and unset all variables you don't need anymore.
+							There might be other Generators that need their space. 
+						</para>
+						<para>
+							If there is nothing you need to do - just give this method an empty body.
+						</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>getNext()</literal></term>
+					<listitem>
+						<para>
+							This implements a very simple <interfacename>Iterator</interfacename>-Interface.
+							It should return an array for each page to add to the sitemap or <literal>NULL</literal>
+							if there is nothing more to submit. See below on how this array is supposed to be formed.
+						</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>getRequiredNamespaces()</literal></term>
+					<listitem>
+						<para>
+							The controller calls this method to ask if your generator makes use of additional namespaces
+							to the standard sitemap tags. If you don't just give this method an empty body. If so see
+							<link linkend="chapter.development.namespaces">the next section for more details</link>.
+						</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
+			
+			<para>
+				The <literal>getNext()</literal> method will be called repeatedly by the controller untill it returns <literal>NULL</literal>.
+				It should return an array with values in every other case.
+			</para>
+			
+			<variablelist>
+				<varlistentry>
+					<term><literal>uid</literal></term>
+					<listitem>
+						<para>
+						If you return <emphasis>real</emphasis> pages from the <literal>pages</literal> table, you can return just
+						its uid and the URL will be generated for you.
+						</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>_OVERRIDE_&#x200B;HREF</literal></term>
+					<listitem>
+						<para>
+						In all other cases you should set this field to the path from the pages root. The domain and protocol will
+						be appended by the controller.
+						</para>
+						<note>
+							<para>
+								You should use the <literal>cObj</literal> given to the <literal>init()</literal>-method to generate
+								the link. Else it might not work with <literal>realURL</literal>. 
+							</para>
+						</note>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>SYS_&#x200B;LASTCHANGED</literal></term>
+					<listitem>
+						<para>
+							The time of the last change of the contents of this page as a unix-timestamp.
+						</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>tx_&#x200B;extensiblesitemap_&#x200B;frequency</literal></term>
+					<listitem>
+						<para>
+							The expected frequency of changes to the contents of this page. 
+						</para>
+						<note>
+							You might want to use the constants in <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Utility_&#x200B;Config</classname>.
+						</note>
+						<para>See <link linkend="glossary.changefreq">glossary for valid values</link>.</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>tx_&#x200B;extensiblesitemap_&#x200B;priority</literal></term>
+					<listitem>
+						<para>
+							The priority of this page compared to the remains of the website. You most likely would make this configurable
+							via the config.  
+						</para>
+						<para>See <link linkend="glossary.priority">glossary for valid values</link>.</para>
+					</listitem>
+				</varlistentry>
+				
+				<varlistentry>
+					<term><literal>TX_&#x200B;EXTENSIBLESITEMAP_&#x200B;ADDITIONAL_&#x200B;FIELDS</literal></term>
+					<listitem>
+						<para>
+							This is were you could put <link linkend="chapter.development.namespaces">custom extensions to the sitemaps protocol.</link>
+							It takes <emphasis>any</emphasis> string you submit and appends it. So you are responsible for the validity of the output.
+							The controller will just pass this content through to the output.
+						</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
+			
+			<para>
+				All the above parameters are optional, as long if either <literal>uid</literal> or <literal>_OVERRIDE_&#x200B;HREF</literal>
+				are present.
+			</para>
+			
+			<para>
+				You can use your class by setting the name of the generator in TypoScript to your classname.
+			</para>
+		</para>
+	</section>
+	
+	<section xml:id="chapter.development.namespaces">
+		<title>Namespaces</title>
+		<para>
+			You can extend the sitemap protocol through namespaces. To avoid slowing of the sitemap generation for large sites
+			this is simply done by returning a string in the field <literal>TX_&#x200B;EXTENSIBLESITEMAP_&#x200B;ADDITIONAL_&#x200B;FIELDS</literal>
+			of the return array. This string will be added to the &lt;url&gt;-tag. 
+		</para>
+		<warning>
+			<para>
+				As your returned string won't be treated any further, you should make use of <literal>htmlspecialchars()</literal>
+				when necessary.
+			</para>
+		</warning>
+		<para>
+			Additionally you have to let the Controller know you make use of namespaces. The Controller calls the 
+			<literal>getRequiredNamespaces()</literal> method before writing the opening tag. You can return <literal>NULL</literal>
+			if you don't make use of namespaces. If you do you should return an array where each line is a namespace you require.
+		</para>
+		<para>
+			You can either use an associate entry where the <literal>key</literal> is the name of the namespace and the <literal>value</literal>
+			the uri for that namespace.<sbr/>
+			Or you can use a simple array where the <literal>value</literal> is the name of the namespace. If the namespace is known the uri
+			will be added automatically. 
+		</para>
+		<para>
+			See <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Controller_&#x200B;Eid</classname><literal>::$namespaces</literal> for 
+			a list of known namespaces.
+		</para>
+		<note>
+			<para>
+				<literal>getRequiredNamespaces()</literal> will be called prior to <literal>init()</literal>.
+			</para>
+		</note>
+	</section>
+</chapter>

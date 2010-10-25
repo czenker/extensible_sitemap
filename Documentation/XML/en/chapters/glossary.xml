@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glossary version="5.0" xmlns="http://docbook.org/ns/docbook"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:xhtml="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     xmlns:ns="http://docbook.org/ns/docbook"
+     xmlns:mathml="http://www.w3.org/1998/Math/MathML">
+
+	<title>Glossary</title>
+
+	<glossentry>
+		<glossterm xml:id="glossary.access-string">access-string</glossterm>
+		<glossdef>
+			<para>
+				The access-string takes one of the following values:
+				<variablelist>
+					<varlistentry>
+						<term><literal>Subscription</literal> (visible)</term>
+						<listitem><para>an article which prompts users to pay to view content.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>Registration</literal> (visible)</term>
+						<listitem><para>an article which prompts users to sign up for an unpaid account to view content.</para></listitem>
+					</varlistentry>
+				</variablelist>
+				If you don't set the access-string or set it to an empty value this means that the full article is accessible to all users for at least thirty days.
+			</para>
+			<para>
+				This definition was taken from the official <trademark>Google</trademark> <link xlink:href="http://www.google.com/support/webmasters/bin/answer.py?answer=93992">
+				documentation on the news namespace</link>.
+			</para>
+			<note>
+				Developers will find class constants for these in <classname>Tx_ExtensibleSitemap_Utility_Config</classname>.
+			</note>
+		</glossdef>
+	</glossentry>
+	
+	<glossentry>
+		<glossterm xml:id="glossary.changefreq">changefreq</glossterm>
+		<glossdef>
+			<para>
+				How frequently the page is likely to change. This value provides general information to search engines and may not correlate exactly to how often they crawl the page. Valid values are:
+				<simplelist type="inline">
+					<member><literal>always</literal></member>
+					<member><literal>hourly</literal></member>
+					<member><literal>daily</literal></member>
+					<member><literal>weekly</literal></member>
+					<member><literal>monthly</literal></member>
+					<member><literal>yearly</literal></member>
+					<member><literal>never</literal></member>
+				</simplelist>.
+			</para>
+			<note>
+				<para>
+					The value <literal>always</literal> should be used to describe documents that change each time they are accessed. The value <literal>never</literal> should be used to describe archived URLs.
+				</para>
+			</note>
+			<note>
+				<para>
+					Please note that the value of this tag is considered a hint and not a command. Even though search engine crawlers may consider this information when making decisions, they may crawl pages marked <literal>hourly</literal> less frequently than that, and they may crawl pages marked <literal>yearly</literal> more frequently than that. Crawlers may periodically crawl pages marked <literal>never</literal> so that they can handle unexpected changes to those pages.
+				</para>
+			</note>
+			<para>
+				This definition was taken from <link xlink:href="http://www.sitemaps.org/protocol.php">sitemaps.org</link> and is licensed under the <link xlink:href="http://www.sitemaps.org/terms.php">Creative Commons Attribution-ShareAlike License (version 2.5)</link>.
+			</para>
+			<note>
+				Developers will find class constants for these in <classname>Tx_ExtensibleSitemap_Utility_Config</classname>.
+			</note>
+		</glossdef>
+	</glossentry>
+
+	<glossentry>
+		<glossterm xml:id="glossary.genre-string">genre-string</glossterm>
+		<glossdef>
+			<para>
+				Valid values for Genres are:
+				<variablelist>
+					<varlistentry>
+						<term><literal>PressRelease</literal> (visible)</term>
+						<listitem><para>an official press release.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>Satire</literal> (visible)</term>
+						<listitem><para>an article which ridicules its subject for didactic purposes.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>Blog</literal> (visible)</term>
+						<listitem><para>any article published on a blog, or in a blog format.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>OpEd</literal></term>
+						<listitem><para> an opinion-based article which comes specifically from the Op-Ed section of your site.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>Opinion</literal></term>
+						<listitem><para>any other opinion-based article not appearing on an Op-Ed page, i.e., reviews, interviews, etc.</para></listitem>
+					</varlistentry>
+					
+					<varlistentry>
+						<term><literal>UserGenerated</literal></term>
+						<listitem><para>newsworthy user-generated content which has already gone through a formal editorial review process on your site.</para></listitem>
+					</varlistentry>
+				</variablelist>
+			</para>
+			<para>
+				This definition was taken from the official <trademark>Google</trademark> <link xlink:href="http://www.google.com/support/webmasters/bin/answer.py?answer=93992">
+				documentation on the news namespace</link>.
+			</para>
+			<note>
+				Developers will find class constants for these in <classname>Tx_ExtensibleSitemap_Utility_Config</classname>.
+			</note>
+		</glossdef>
+	</glossentry>
+	
+	<glossentry>
+		<glossterm xml:id="glossary.priority">priority</glossterm>
+		<glossdef>
+			<para>
+				The priority of this URL relative to other URLs on your site. Valid values range from <literal>0.0</literal> to <literal>1.0</literal>. This value does not affect how your pages are compared to pages on other sites—it only lets the search engines know which pages you deem most important for the crawlers.
+			</para>
+			<para>
+				The default priority of a page is <literal>0.5</literal>.
+			</para>
+			<para>
+				Please note that the priority you assign to a page is not likely to influence the position of your URLs in a search engine's result pages. Search engines may use this information when selecting between URLs on the same site, so you can use this tag to increase the likelihood that your most important pages are present in a search index.
+			</para>
+			<para>
+				Also, please note that assigning a high priority to all of the URLs on your site is not likely to help you. Since the priority is relative, it is only used to select between URLs on your site.
+			</para>
+			<para>
+				This definition was taken from <link xlink:href="http://www.sitemaps.org/protocol.php">sitemaps.org</link> and is licensed under the <link xlink:href="http://www.sitemaps.org/terms.php">Creative Commons Attribution-ShareAlike License (version 2.5)</link>.
+			</para>
+		</glossdef>
+	</glossentry>
+	
+	
+
+</glossary>

@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xml:id="chapter.administration"
+	 xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:xhtml="http://www.w3.org/1999/xhtml"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     xmlns:ns="http://docbook.org/ns/docbook"
+     xmlns:mathml="http://www.w3.org/1998/Math/MathML">
+
+	<title>Administration</title>
+	
+	<section xml:id="chapter.administration.quickstart">
+		<title>QuickStart</title>
+		<para>
+			If you are just keen on getting the extension running and don't care much on <emphasis>why</emphasis> it (-hopefully-)
+			works, this is for you.
+		</para>
+		<procedure>
+			<step>
+				<title>Download and install the extension <productname>extensible_sitemap</productname></title>
+				<note>
+					<para>
+						If you are new to <productname>TYPO3</productname> and don't know how to install an extension,
+						the Web-Empowered Church has a nice tutorial on <link xlink:href="https://webempoweredchurch.org/clientcenter/knowledgebase/213/How-Do-I-Install-an-Extension.html">
+						how to install a TYPO3 extension</link>.
+					</para>
+				</note>
+			</step>
+			<step>
+				<title>Include the template <literal>Auto Configuration (extensible_sitemap)</literal> to the rootpage of your website</title>
+				<note>
+					<para>
+						In <productname>TYPO3</productname> 4.4 this page is marked by a globe in the pagetree.
+					</para>
+				</note>
+			</step>
+			<step>
+				<title>View the sitemap</title>
+				<para>
+					Well, actually this is all it takes. Have a look at <literal>http://example.org/index.php?eID=extensible_sitemap</literal> to
+					see the sitemap for your website. If you have <productname>tt_news</productname> installed you can view a news
+					sitemap at <literal>http://example.org/index.php?eID=extensible_sitemap&amp;sitemap=news</literal>.
+				</para>
+				<note><para>
+					Don't panik if you have tt_news configured, but just get an empty <literal>&lt;urlset&gt;</literal>-Tag. Only news from the 
+					last 7 days are displayed by default. This is because <trademark>Google</trademark> only indexes news if they are not older 
+					than 2 days. So displaying older records seems useless. You can configure this value though.  
+				</para></note>
+			</step>
+		</procedure>
+	</section>
+	
+	<section xml:id="chapter.administration.configuration">
+		<title>Configuration</title>
+		
+		<para>
+			All configuration of the extension is done via TypoScript inside <literal>plugin.tx_extensiblesitemap</literal>.
+		</para>
+		
+		<table xml:id="chapter.administration.configuration.plugin">
+			<title>Configuration for <literal>plugin.tx_extensiblesitemap</literal></title>
+			<tgroup cols="3">
+				<thead>
+					<row>
+						<entry>Property</entry>
+						<entry>Data type</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>
+							<literal>default</literal>
+						</entry>
+						<entry>
+							<literal><link linkend="chapter.administration.configuration.sitemap-configuration">sitemap-configuration</link></literal>
+						</entry>
+						<entry>
+							This is the configuration for the default sitemap that will be displayed if you call
+							<literal>http://example.org/index.php?eID=extensible_sitemap</literal>.
+						</entry>
+					</row>
+					<row>
+						<entry>
+							<userinput>[sitemap]</userinput>
+						</entry>
+						<entry>
+							<literal><link linkend="chapter.administration.configuration.sitemap-configuration">sitemap-configuration</link></literal>
+						</entry>
+						<entry>
+							Additional sitemaps that might be called by visiting <literal>http://example.org/index.php?eID=extensible_sitemap&#x200B;&amp;sitemap=<userinput>[sitemap]</userinput></literal>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+		
+		<table xml:id="chapter.administration.configuration.sitemap-configuration">
+			<title>Configuration for <literal>sitemap-configuration</literal></title>
+			<tgroup cols="3">
+				<thead>
+					<row>
+						<entry>Property</entry>
+						<entry>Data type</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>
+							<userinput>[generator]</userinput>
+						</entry>
+						<entry>
+							<literal>classname/ +config</literal>
+						</entry>
+						<entry>
+							You can define a list of multiple generators here that might return records for your sitemap.
+							Each of them can be defined by a configuration array. The configuration options depend on the
+							generator - so have a look at the corresponding documentation.
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+		
+		<example>
+			<title>Example configuration</title>
+			<programlisting>plugin.tx_extensiblesitemap {
+	# this is the first sitemap
+	default {
+		# this is a generator that generates a sitemap for all TYPO3 pages
+		# it has no further configuration 
+		page = Tx_ExtensibleSitemap_Generator_Page_Recursive
+	
+		# additionally to the TYPO3 pages tt_news generates pages by its single
+		# view there is a different class taking care of submitting the
+		# corresponding data to the sitemap creator 
+		tt_news_article = Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle
+		# this is some additional configuration for the class
+		tt_news_article {
+			pid_list = {$plugin.tt_news.pid_list}
+			singlePid = {$plugin.tt_news.singlePid}
+		}
+	}
+	
+	# this is a second sitemap - completely independent from the first one
+	news {
+		# it uses yet another generator and has some configuration
+		tt_news_article = Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle
+		tt_news_article {
+			publicationName = {$company.name}
+			maxAge = 365
+			pid_list = {$plugin.tt_news.pid_list}
+			singlePid = {$plugin.tt_news.singlePid}
+		}
+	}
+}</programlisting>
+		</example>
+		
+	</section>
+	
+	<section xml:id="chapter.administration.generators">
+		<title>Generators</title>
+		
+		<section xml:id="chapter.administration.generators.page.recursive">
+			<title><classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;Page_&#x200B;Recursive</classname></title>
+			<para>A generator for "extensible_sitemap" that indexes pages of the TYPO3 page-tree recursively.</para>
+			<table>
+				<title>parameters for <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;Page_&#x200B;Recursive</classname></title>
+				<tgroup cols="4">
+					<thead>
+						<row>
+							<entry>Property</entry>
+							<entry>Data type</entry>
+							<entry>Description</entry>
+							<entry>Default</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>
+								<userinput>pidList</userinput>
+							</entry>
+							<entry>
+								<literal>comma-seperated integer</literal>
+							</entry>
+							<entry>
+								A comma-seperated list of pageIds that serve as the root for the indexer. These pages and all
+								below will be submitted to the sitemap
+							</entry>
+							<entry>
+								<literal>current</literal>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			
+			<example>
+				<title>Example using <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;Page_&#x200B;Recursive</classname></title>
+				<programlisting>plugin.tx_extensiblesitemap {
+	default {
+		# this is a very simple way to use the sitemap
+		# if you call the eid-parameter on any pageId in the frontend it will
+		# output a sitemap of this page and all its siblings
+		page = Tx_ExtensibleSitemap_Generator_Page_Recursive
+	}
+	
+	fixed-pid {
+		# this will output a sitemap of the pages 42 and 1337 and all its
+		# siblings no matter from which page you call it
+		page = Tx_ExtensibleSitemap_Generator_Page_Recursive
+		pidList = 42,1337
+	}
+}</programlisting>
+		</example>
+			
+		</section>
+		
+		<section xml:id="chapter.administration.generators.ttnews.simplearticle">
+			<title><classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;TtNews_&#x200B;SimpleArticle</classname></title>
+			<para>a generator for "extensible_sitemap" that indexes tt_news articles. This is a basic
+			version that does NOT extend the XML-Scheme by additional tags - so these are just the bare
+			webpages created and do <emphasis>not</emphasis> generate a sitemap for google news .</para>
+			<warning>
+				<para>
+					Please notice that this is for tt_&#x200B;news from version 3.0.0 up - the parameters have changed with this version.
+				</para>
+			</warning>
+			<table>
+				<title>parameters for <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;TtNews_&#x200B;SimpleArticle</classname></title>
+				<tgroup cols="4">
+					<thead>
+						<row>
+							<entry>Property</entry>
+							<entry>Data type</entry>
+							<entry>Description</entry>
+							<entry>Default</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>
+								<userinput>singlePid</userinput>
+							</entry>
+							<entry>
+								<literal>integer</literal>
+							</entry>
+							<entry>
+								the page id of the single view
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>pid_list</userinput>
+							</entry>
+							<entry>
+								<literal>comma-seperated integer</literal>
+							</entry>
+							<entry>
+								the pids the records reside in (set to <userinput>0</userinput> to take all records)
+							</entry>
+							<entry><literal>0</literal></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>recursive</userinput>
+							</entry>
+							<entry>
+								<literal>integer</literal>
+							</entry>
+							<entry>
+								how many levels under the above given <literal>pid_list</literal> should be looked for records too
+							</entry>
+							<entry><literal>0</literal></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>defaultPriority</userinput>
+							</entry>
+							<entry>
+								<literal><link linkend="glossary.priority">priority</link></literal>
+							</entry>
+							<entry>
+								the default priority assigned to each item.
+							</entry>
+							<entry></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<example>
+				<title>Example using <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;TtNews_&#x200B;SimpleArticle</classname></title>
+				<programlisting>plugin.tx_extensiblesitemap {
+	default {
+		# takes records from pages 42 and 1337 and links them
+		# to the page 42
+		news = Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle
+		news {
+			singlePid = 42
+			pid_list = 42,1337
+			# this has to be set always
+			publicationName = TYPO3 News
+		}
+		
+		news2 = Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle
+		news2 {
+			# you could copy the configuration from the tt_&#x200B;news-
+			# plugin configuration
+			pid_list &lt; plugin.tt_news.pid_list
+			recursive &lt; plugin.tt_news.recursive
+			singlePid &lt; plugin.tt_news.singlePid
+			
+			publicationName = TYPO3 News
+		}
+		
+		news3 = Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle
+		news3 {
+			# ... or even better if you take the constants
+			pid_list = {$plugin.tt_news.pid_list}
+			recursive = {$plugin.tt_news.recursive}
+			singlePid = {$plugin.tt_news.singlePid}
+			
+			publicationName = TYPO3 News
+			
+			# if this is not set it is tried to auto-determine
+			# from your pages settings
+			publicationLanguage = en
+			
+			# your news article is only available for registered
+			# users. Registration is free.
+			access = Registration
+			
+			# your news articles are opinion-based blog articles
+			genres = Blog,Opinion
+			
+			# only display news from the last 3 days
+			maxAge = 3
+			
+			# such a high value means, the news are rather important
+			# for your page
+			defaultPriority = 0.8
+		}
+	}
+}</programlisting>
+		</example>
+		</section>
+		
+		<section xml:id="chapter.administration.generators.ttnews.newsarticle">
+			<title><classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;TtNews_&#x200B;NewsArticle</classname></title>
+			<para>A generator for "extensible_sitemap" that indexes tt_news articles for a news sitemap.</para>
+			<warning>
+				<para>
+					Please notice that this is for tt_&#x200B;news from version 3.0.0 up - the parameters have changed with this version.
+				</para>
+			</warning>
+			<table>
+				<title>parameters for <classname>Tx_&#x200B;ExtensibleSitemap_&#x200B;Generator_&#x200B;TtNews_&#x200B;NewsArticle</classname></title>
+				<tgroup cols="4">
+					<thead>
+						<row>
+							<entry>Property</entry>
+							<entry>Data type</entry>
+							<entry>Description</entry>
+							<entry>Default</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>
+								<userinput>singlePid</userinput>
+							</entry>
+							<entry>
+								<literal>integer</literal>
+							</entry>
+							<entry>
+								the page id of the single view
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>pid_list</userinput>
+							</entry>
+							<entry>
+								<literal>comma-seperated integer</literal>
+							</entry>
+							<entry>
+								the pids the records reside in (set to <userinput>0</userinput> to take all records)
+							</entry>
+							<entry><literal>0</literal></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>recursive</userinput>
+							</entry>
+							<entry>
+								<literal>integer</literal>
+							</entry>
+							<entry>
+								how many levels under the above given <literal>pid_list</literal> should be looked for records too
+							</entry>
+							<entry><literal>0</literal></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>default&#x200B;Priority</userinput>
+							</entry>
+							<entry>
+								<literal><link linkend="glossary.priority">priority</link></literal>
+							</entry>
+							<entry>
+								the default priority assigned to each item.
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>publication&#x200B;Name</userinput>
+							</entry>
+							<entry>
+								<literal>string</literal>
+							</entry>
+							<entry>
+								the name of the publication.
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>publication&#x200B;Language</userinput>
+							</entry>
+							<entry>
+								<literal>string</literal>
+							</entry>
+							<entry>
+								the 2- or 3-signed ISO 639 Language Code of the language this news is in. Leave blank for autodetection.
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>access</userinput>
+							</entry>
+							<entry>
+								<literal><link linkend="glossary.access-string">access-string</link></literal>
+							</entry>
+							<entry>
+								if access to the article is not public, set one of 
+								<simplelist type="inline">
+									<member><literal>Subscription</literal></member>
+									<member><literal>Registration</literal></member>
+								</simplelist>.
+								Also see <link linkend="glossary.access-string">glossary entry</link>.
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>genres</userinput>
+							</entry>
+							<entry>
+								<literal>comma-seperated <link linkend="glossary.access-string">genre-string</link></literal>
+							</entry>
+							<entry>
+								might be a comma-seperated list of 
+								<simplelist type="inline">
+									<member><literal>PressRelease</literal></member>
+									<member><literal>Satire</literal></member>
+									<member><literal>Blog</literal></member>
+									<member><literal>OpEd</literal></member>
+									<member><literal>Opinion</literal></member>
+									<member><literal>UserGenerated</literal></member>
+								</simplelist>.
+								Also see <link linkend="glossary.genre-string">glossary entry</link>.
+							</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>maxAge</userinput>
+							</entry>
+							<entry>
+								<literal>integer</literal>
+							</entry>
+							<entry>
+								the maximum age in days of the news in order to be displayed. <trademark>Google</trademark> <link xlink:href="http://www.google.com/support/news_pub/bin/answer.py?answer=74496">states it won't add news if they were published more than 2 days ago</link>. 
+							</entry>
+							<entry><literal>7</literal></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</section>
+	</section>
+</chapter>

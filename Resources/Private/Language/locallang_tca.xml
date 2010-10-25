@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'extensible_sitemap'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+<!--			<label index="tx_template_header_link_text">Link Text</label>-->
+			<label index="tx_extensiblesitemap_frequenzy">frequenzy of changes to this page</label>
+			<label index="tx_extensiblesitemap_frequenzy.auto">(auto)</label>
+			<label index="tx_extensiblesitemap_frequenzy.always">always</label>
+			<label index="tx_extensiblesitemap_frequenzy.hourly">hourly</label>
+			<label index="tx_extensiblesitemap_frequenzy.daily">daily</label>
+			<label index="tx_extensiblesitemap_frequenzy.weekly">weekly</label>
+			<label index="tx_extensiblesitemap_frequenzy.monthly">monthly</label>
+			<label index="tx_extensiblesitemap_frequenzy.yearly">yearly</label>
+			<label index="tx_extensiblesitemap_frequenzy.never">never</label>
+			<label index="tx_extensiblesitemap_priority">priority of this site compared to others</label>
+			<label index="tx_extensiblesitemap_priority.disabled">(disabled)</label>
+			<label index="tx_extensiblesitemap_priority.10">1.0 - extraordinary high</label>
+			<label index="tx_extensiblesitemap_priority.9">0.9</label>
+			<label index="tx_extensiblesitemap_priority.8">0.8</label>
+			<label index="tx_extensiblesitemap_priority.7">0.7</label>
+			<label index="tx_extensiblesitemap_priority.6">0.6</label>
+			<label index="tx_extensiblesitemap_priority.5">0.5 - average</label>
+			<label index="tx_extensiblesitemap_priority.4">0.4</label>
+			<label index="tx_extensiblesitemap_priority.3">0.3</label>
+			<label index="tx_extensiblesitemap_priority.2">0.2</label>
+			<label index="tx_extensiblesitemap_priority.1">0.1 - pretty unimportant</label>
+		</languageKey>
+	</data>
+</T3locallang>

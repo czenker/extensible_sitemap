@@ -1,0 +1,27 @@
+plugin.tx_extensiblesitemap {
+	default {
+		page = Tx_ExtensibleSitemap_Generator_Page_Recursive
+	}
+}
+
+[userFunc = user_extensiblesitemap_isExtensionEnabled(tt_news) ]
+plugin.tx_extensiblesitemap {
+	default {
+		tt_news_article = Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle
+		tt_news_article {
+			pid_list < plugin.tt_news.pid_list
+			recursive < plugin.tt_news.recursive
+			singlePid < plugin.tt_news.singlePid
+		}
+	}
+	
+	news {
+		tt_news_article = Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle
+		tt_news_article {
+			publicationName = {$plugin.tx_extensiblesitemap.newsTitle}
+			pid_list < plugin.tt_news.pid_list
+			recursive < plugin.tt_news.recursive
+			singlePid < plugin.tt_news.singlePid
+		}
+	}
+}
