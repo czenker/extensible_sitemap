@@ -64,6 +64,11 @@
 				<listitem><para><link xlink:href="http://github.com/czenker/extensible_sitemap" /></para></listitem>
 			</varlistentry>
 			
+			<varlistentry>
+				<term>Official Documentation</term>
+				<listitem><para><link xlink:href="http://github.com/czenker/extensible_sitemap/raw/master/Documentation/pdf/en/index.pdf" /></para></listitem>
+			</varlistentry>
+			
 		</variablelist>
 	</section>
 
