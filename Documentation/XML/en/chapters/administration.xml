@@ -287,6 +287,18 @@
 							</entry>
 							<entry></entry>
 						</row>
+						<row>
+							<entry>
+								<userinput>showInternalPages</userinput>
+							</entry>
+							<entry>
+								<literal>boolean</literal>
+							</entry>
+							<entry>
+								if a news with type "internal pages" should be listed
+							</entry>
+							<entry><literal>0</literal></entry>
+						</row>
 					</tbody>
 				</tgroup>
 			</table>
@@ -488,6 +500,18 @@
 								the maximum age in days of the news in order to be displayed. <trademark>Google</trademark> <link xlink:href="http://www.google.com/support/news_pub/bin/answer.py?answer=74496">states it won't add news if they were published more than 2 days ago</link>. 
 							</entry>
 							<entry><literal>7</literal></entry>
+						</row>
+						<row>
+							<entry>
+								<userinput>showInternalPages</userinput>
+							</entry>
+							<entry>
+								<literal>boolean</literal>
+							</entry>
+							<entry>
+								if a news with type "internal pages" should be listed
+							</entry>
+							<entry><literal>1</literal></entry>
 						</row>
 					</tbody>
 				</tgroup>

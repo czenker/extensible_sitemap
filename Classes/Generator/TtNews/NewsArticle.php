@@ -15,7 +15,8 @@
  *  * publicationLanguage: the 2- or 3-signed ISO 639 Language Code of the language this news is in. Leave blank for autodetection.
  *  * access: if access to the article is not public, set one of "Subscription,Registration", also see http://www.google.com/support/webmasters/bin/answer.py?answer=93992
  *  * genres: might be a comma-seperated list of "PressRelease,Satire,Blog,OpEd,Opinion,UserGenerated", also see http://www.google.com/support/webmasters/bin/answer.py?answer=93992
- *  * maxAge: the maximum age in days of the news in order to be displayed. Default is "7" but Google states it won't add news if they were published more than 2 days ago: http://www.google.com/support/news_pub/bin/answer.py?answer=74496 
+ *  * maxAge: the maximum age in days of the news in order to be displayed. Default is "7" but Google states it won't add news if they were published more than 2 days ago: http://www.google.com/support/news_pub/bin/answer.py?answer=74496
+ *  * showInternalPages: if a news with type "internal pages" should be listed, defaults to true 
  *  
  *  
  *  @see http://www.google.com/support/webmasters/bin/answer.py?answer=74288
@@ -29,7 +30,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle extends Tx_ExtensibleSit
 	 * 
 	 * @var string
 	 */
-	protected $fieldList = 'uid,title,datetime,tstamp,archivedate,image,imagecaption,imagetitletext';
+	protected $fieldList = 'uid,title,datetime,tstamp,archivedate,image,imagecaption,imagetitletext,type,page';
 	
 	/**
 	 * an array used to store preprocessed values
@@ -51,15 +52,38 @@ class Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle extends Tx_ExtensibleSit
 		}
 		
 		/**
+		 * a limitation to certain types of the tt_news record
+		 * "0" is the normal news record
+		 * "1" is the internal page
+		 * 
+		 * note: linking to external pages seems useless as sitemaps can't be 
+		 * created for a different site 
+		 *  
+		 * @var string
+		 */
+		$types = isset($this->conf['showInternalPages']) && $this->conf['showInternalPages'] == 0 ? '0' : '0,1';
+		
+		/**
 		 * calculate the minimum timestamp for a news to be released
 		 * @var integer
 		 */
 		$minAge = time() - ($this->conf['maxAge'] ? intval($this->conf['maxAge']) : 7) * 86400;
 		
+		/**
+		 * the WHERE part of the select query
+		 * @var string
+		 */
+		$selectWhere = 
+			($pids === 0 ? '1==1' : 'pid IN (' . $pids . ')').
+			$this->cObj->enableFields('tt_news').
+			' AND datetime > ' . $minAge.
+			' AND type IN('.$types.')'
+		;
+		
 		$this->newsHandle = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			$this->fieldList,
 			'tt_news',
-			($pids === 0 ? '1==1' : 'pid IN (' . $pids . ')').$this->cObj->enableFields('tt_news').'AND datetime > ' . $minAge,
+			$selectWhere,
 			'',
 			'datetime DESC'
 		);
@@ -159,20 +183,9 @@ class Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle extends Tx_ExtensibleSit
 			}
 		}
 		
-		return array(
-			'title' => $news['title'],
-			'_OVERRIDE_HREF' => $this->cObj->typoLink_URL(array(
-				'parameter' => $this->singlePid,
-				'additionalParams' => sprintf(
-					'&tx_ttnews[tt_news]=%d',
-					$news['uid']
-				),
-			)),
-			'SYS_LASTCHANGED' => $news['tstamp'],
-			'tx_extensiblesitemap_priority' => $this->getPriority($news),
-			'tx_extensiblesitemap_frequency' => $this->getFrequency($news),
-			'TX_EXTENSIBLESITEMAP_ADDITIONAL_FIELDS' => $add
-		);
+		$array = parent::processNews($news);
+		$array['TX_EXTENSIBLESITEMAP_ADDITIONAL_FIELDS'] = $add;
+		return $array;
 	}
 	
 	/**
