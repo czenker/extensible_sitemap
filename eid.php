@@ -1,5 +1,5 @@
 <?php
-include_once(t3lib_extMgm::extPath($_EXTKEY) . 'Utility/user_extensiblesitemap_extMgm.php');
+include_once(t3lib_extMgm::extPath('extensible_sitemap') . 'Utility/user_extensiblesitemap_extMgm.php');
 try {
 	ob_start();
 	$generator = t3lib_div::makeInstance('Tx_ExtensibleSitemap_Controller_Eid');
