@@ -38,4 +38,6 @@ class Tx_ExtensibleSitemapTests_GeneratorBase implements Tx_ExtensibleSitemap_Ge
 	 * @return array
 	 */
 	public function getRequiredNamespaces() {}
+	
+	public function finish() {}
 }
