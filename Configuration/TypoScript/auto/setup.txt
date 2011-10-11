@@ -25,3 +25,4 @@ plugin.tx_extensiblesitemap {
 		}
 	}
 }
+[end]
