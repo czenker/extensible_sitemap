@@ -151,12 +151,14 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 	protected function renderPage($page) {
 		echo '<url>';
 		$location = t3lib_div::locationHeaderUrl(
-			$page['_OVERRIDE_HREF'] ? 
-			$page['_OVERRIDE_HREF'] : //if: _OVERRIDE_HREF is used -> use it 
-			htmlspecialchars($this->cObj->typoLink('', array( // else: generate url
-				'parameter' => $page['uid'],
-				'returnLast' => 'url',
-			)))
+			htmlspecialchars(
+				$page['_OVERRIDE_HREF'] ? 
+				$page['_OVERRIDE_HREF'] : //if: _OVERRIDE_HREF is used -> use it 
+				$this->cObj->typoLink('', array( // else: generate url
+					'parameter' => $page['uid'],
+					'returnLast' => 'url',
+				))
+			)
 		);
 		echo '<loc>'.$location.'</loc>';
 		if($page['SYS_LASTCHANGED'] && $page['SYS_LASTCHANGED'] > 86400) {
