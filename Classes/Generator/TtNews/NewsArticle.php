@@ -74,7 +74,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_NewsArticle extends Tx_ExtensibleSit
 		 * @var string
 		 */
 		$selectWhere = 
-			($pids === 0 ? '1==1' : 'pid IN (' . $pids . ')').
+			($pids === 0 ? '1=1' : 'pid IN (' . $pids . ')').
 			$this->cObj->enableFields('tt_news').
 			' AND datetime > ' . $minAge.
 			' AND type IN('.$types.')'

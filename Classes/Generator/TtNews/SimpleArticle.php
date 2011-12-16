@@ -105,7 +105,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 		 * @var string
 		 */
 		$selectWhere = 
-			($pids === 0 ? '' : 'pid IN (' . $pids . ')').
+			($pids === 0 ? '1=1' : 'pid IN (' . $pids . ')').
 			$this->cObj->enableFields('tt_news'). 
 			' AND type IN('.$types.')' // only search for "news" and maybe "internal page" type
 		;
