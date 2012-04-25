@@ -159,6 +159,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 					'&tx_ttnews[tt_news]=%d',
 					$news['uid']
 				),
+				'useCacheHash' => true
 			));
 		} elseif($news['type'] == 1) {
 			// if: link internal page
