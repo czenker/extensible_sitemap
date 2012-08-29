@@ -83,7 +83,11 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 			if (!$this->shouldPageBeIndexed($pageInfo)) {
 				continue;
 			}
-			
+
+			if(array_key_exists('mobile', $this->conf) && $this->conf['mobile']) {
+				$pageInfo['TX_EXTENSIBLESITEMAP_ADDITIONAL_FIELDS'] = '<mobile:mobile />';
+			}
+
 			return $pageInfo;
 			
 		}
@@ -110,5 +114,12 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 	 * 
 	 * @return array
 	 */
-	public function getRequiredNamespaces() {}
+	public function getRequiredNamespaces() {
+		if(is_array($this->conf) && array_key_exists('mobile', $this->conf) && $this->conf['mobile'] == true) {
+			return array('mobile');
+		} else {
+			return array();
+		}
+
+	}
 }

@@ -130,7 +130,6 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 		$this->startSitemap();
 		
 		foreach($this->generators as $name => $generator) {
-			$generator->init($this->config[$name.'.'] ? $this->config[$name.'.'] : array(), $this, $this->cObj);
 			
 			while($page = $generator->getNext()) {
 				$this->renderPage($page);
@@ -210,6 +209,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 				continue;
 			}
 			$generator = t3lib_div::makeInstance((string)$class);
+			$generator->init($this->config[$name.'.'] ? $this->config[$name.'.'] : array(), $this, $this->cObj);
 			
 			if(!$generator instanceof Tx_ExtensibleSitemap_Generator_Interface) {
 				$this->throwError(500, sprintf('"%s" is no instance of Tx_ExtensibleSitemap_Generator_Interface', get_class($generator)));
