@@ -148,18 +148,23 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 	 * @param array $page
 	 */
 	protected function renderPage($page) {
-		echo '<url>';
-		$location = t3lib_div::locationHeaderUrl(
-			htmlspecialchars(
-				$page['_OVERRIDE_HREF'] ? 
-				$page['_OVERRIDE_HREF'] : //if: _OVERRIDE_HREF is used -> use it 
-				$this->cObj->typoLink('', array( // else: generate url
-					'parameter' => $page['uid'],
-					'returnLast' => 'url',
-				))
-			)
-		);
-		echo '<loc>'.$location.'</loc>';
+        if($page['_OVERRIDE_HREF']) {
+            $location = $page['_OVERRIDE_HREF'];
+        } else {
+            $location = $this->cObj->typoLink('|', array( // else: generate url
+                'parameter' => $page['uid'],
+                'returnLast' => 'url',
+            ));
+            if($location == '|') {
+                // if: no link to page was generated
+                // (can happen when page is hidden in a language)
+                return;
+            }
+        }
+        $location = t3lib_div::locationHeaderUrl($location);
+        echo '<url>';
+        echo '<loc>'.htmlspecialchars($location).'</loc>';
+
 		if($page['SYS_LASTCHANGED'] && $page['SYS_LASTCHANGED'] > 86400) {
 			echo '<lastmod>'.date('c', $page['SYS_LASTCHANGED']).'</lastmod>';
 		}
