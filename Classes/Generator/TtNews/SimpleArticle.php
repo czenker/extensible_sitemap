@@ -13,7 +13,6 @@
  *  * pid_list: the pids the records reside in (set to "0" to take all records)
  *  * recursive: how many levels under the above given pid_list should be looked for records too
  *  * defaultPriority: the default priority assigned to each item.
- *  * showInternalPages: if a news with type "internal pages" should be listed, defaults to false
  */
 class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_ExtensibleSitemap_Generator_Interface {
 	
@@ -26,7 +25,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 	 * 
 	 * @var string
 	 */
-	protected $fieldList = 'uid,title,datetime,tstamp,archivedate,type,page';
+	protected $fieldList = 'uid,title,datetime,tstamp,archivedate';
 	
 	/**
 	 * timestamp of the current time will be cached here
@@ -51,6 +50,7 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 	 * @var integer
 	 */
 	protected $singlePid = null;
+	
 	
 	/**
 	 * initializes the generator
@@ -87,33 +87,10 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 		if($pids !== 0) {
 			$pids = $this->getPidList($pids, $recursive);
 		}
-		
-		/**
-		 * a limitation to certain types of the tt_news record
-		 * "0" is the normal news record
-		 * "1" is the internal page
-		 * 
-		 * note: linking to external pages seems useless as sitemaps can't be 
-		 * created for a different site 
-		 *  
-		 * @var string
-		 */
-		$types = $this->conf['showInternalPages'] ? '0,1' : '0';
-		
-		/**
-		 * the WHERE part of the select query
-		 * @var string
-		 */
-		$selectWhere = 
-			($pids === 0 ? '1=1' : 'pid IN (' . $pids . ')').
-			$this->cObj->enableFields('tt_news'). 
-			' AND type IN('.$types.')' // only search for "news" and maybe "internal page" type
-		;
-		
 		$this->newsHandle = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			$this->fieldList,
 			'tt_news',
-			$selectWhere,
+			($pids === 0 ? '' : 'pid IN (' . $pids . ')'). $this->cObj->enableFields('tt_news'),
 			'',
 			'datetime DESC'
 		);
@@ -151,26 +128,15 @@ class Tx_ExtensibleSitemap_Generator_TtNews_SimpleArticle implements Tx_Extensib
 	 * @param $news
 	 */
 	protected function processNews($news) {
-		
-		if(empty($news['type'])) {
-			$href = $this->cObj->typoLink_URL(array(
+		return array(
+			'title' => $news['title'],
+			'_OVERRIDE_HREF' => $this->cObj->typoLink_URL(array(
 				'parameter' => $this->singlePid,
 				'additionalParams' => sprintf(
 					'&tx_ttnews[tt_news]=%d',
 					$news['uid']
 				),
-				'useCacheHash' => true
-			));
-		} elseif($news['type'] == 1) {
-			// if: link internal page
-			$href = $this->cObj->typoLink_URL(array(
-				'parameter' => $news['page'],
-			));
-		}
-		
-		return array(
-			'title' => $news['title'],
-			'_OVERRIDE_HREF' => $href,
+			)),
 			'SYS_LASTCHANGED' => $news['tstamp'],
 			'tx_extensiblesitemap_priority' => $this->getPriority($news),
 			'tx_extensiblesitemap_frequency' => $this->getFrequency($news)
