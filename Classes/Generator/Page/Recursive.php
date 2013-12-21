@@ -30,8 +30,8 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 		$this->parent = $parent;
 		$this->cObj = $cObj;
 		
-		$pids = array_key_exists('pidList', $this->conf) ? 
-			t3lib_div::trimExplode(',', $this->conf['pidList'], true) :
+		$pids = array_key_exists('pidList', $this->conf) ?
+            \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->conf['pidList'], true) :
 			array(0) 
 		;
 		
@@ -40,7 +40,7 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 		 * an array that have all fields from $this->fieldList as keys and NULL as value
 		 * @var array
 		 */
-		$fieldList = array_flip(t3lib_div::trimExplode(',', $this->fieldList, true));
+		$fieldList = array_flip(\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->fieldList, true));
 		
 		//TODO: this could be optimized by using one db-query 
 		foreach($pids as $pid) {
@@ -83,11 +83,7 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 			if (!$this->shouldPageBeIndexed($pageInfo)) {
 				continue;
 			}
-
-			if(array_key_exists('mobile', $this->conf) && $this->conf['mobile']) {
-				$pageInfo['TX_EXTENSIBLESITEMAP_ADDITIONAL_FIELDS'] = '<mobile:mobile />';
-			}
-
+			
 			return $pageInfo;
 			
 		}
@@ -114,12 +110,5 @@ class Tx_ExtensibleSitemap_Generator_Page_Recursive implements Tx_ExtensibleSite
 	 * 
 	 * @return array
 	 */
-	public function getRequiredNamespaces() {
-		if(is_array($this->conf) && array_key_exists('mobile', $this->conf) && $this->conf['mobile'] == true) {
-			return array('mobile');
-		} else {
-			return array();
-		}
-
-	}
+	public function getRequiredNamespaces() {}
 }

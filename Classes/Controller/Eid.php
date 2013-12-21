@@ -22,14 +22,25 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once(PATH_tslib . 'class.tslib_pagegen.php');
-require_once(PATH_tslib . 'class.tslib_fe.php');
-require_once(PATH_t3lib . 'class.t3lib_page.php');
-require_once(PATH_tslib . 'class.tslib_content.php');
-require_once(PATH_t3lib . 'class.t3lib_userauth.php' );
-require_once(PATH_tslib . 'class.tslib_feuserauth.php');
-require_once(PATH_t3lib . 'class.t3lib_tstemplate.php');
-require_once(PATH_t3lib . 'class.t3lib_cs.php');
+
+
+//require_once(PATH_tslib . 'class.tslib_pagegen.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('frontend') . 'Classes/Page/PageGenerator.php';
+//require_once(PATH_tslib . 'class.tslib_fe.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('frontend') . 'Classes/Controller/TypoScriptFrontendController.php';
+//require_once(PATH_t3lib . 'class.t3lib_page.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('frontend') . 'Classes/Page/PageRepository.php';
+//require_once(PATH_tslib . 'class.tslib_content.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('frontend') . 'Classes/ContentObject/ContentObjectRenderer.php';
+//require_once(PATH_t3lib . 'class.t3lib_userauth.php' );
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('core') . 'Classes/Authentication/AbstractUserAuthentication.php';
+//require_once(PATH_tslib . 'class.tslib_feuserauth.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('frontend') . 'Classes/Authentication/FrontendUserAuthentication.php';
+//require_once(PATH_t3lib . 'class.t3lib_tstemplate.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('core') . 'Classes/TypoScript/TemplateService.php';
+//require_once(PATH_t3lib . 'class.t3lib_cs.php');
+require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('core') . 'Classes/Charset/CharsetConverter.php';
+
 
 /**
  * This class implements a Google sitemap.
@@ -92,7 +103,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 		}
 		
 		// fill the config member variable
-		$sitemap = t3lib_div::_GP('sitemap') ? t3lib_div::_GP('sitemap').'.' : 'default.';
+		$sitemap = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('sitemap') ? \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('sitemap').'.' : 'default.';
 		if(array_key_exists($sitemap, $GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_extensiblesitemap.'])) {
 			$this->config = &$GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_extensiblesitemap.'][$sitemap];
 		} else {
@@ -104,7 +115,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 			$this->throwError(500, 'The used configuration is not an array.');
 		}
 		
-		$this->cObj = t3lib_div::makeInstance('tslib_cObj');
+		$this->cObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tslib_cObj');
 		$this->cObj->start(array());
 	}
 	
@@ -130,6 +141,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 		$this->startSitemap();
 		
 		foreach($this->generators as $name => $generator) {
+			$generator->init($this->config[$name.'.'] ? $this->config[$name.'.'] : array(), $this, $this->cObj);
 			
 			while($page = $generator->getNext()) {
 				$this->renderPage($page);
@@ -148,23 +160,16 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 	 * @param array $page
 	 */
 	protected function renderPage($page) {
-        if($page['_OVERRIDE_HREF']) {
-            $location = $page['_OVERRIDE_HREF'];
-        } else {
-            $location = $this->cObj->typoLink('|', array( // else: generate url
-                'parameter' => $page['uid'],
-                'returnLast' => 'url',
-            ));
-            if($location == '|') {
-                // if: no link to page was generated
-                // (can happen when page is hidden in a language)
-                return;
-            }
-        }
-        $location = t3lib_div::locationHeaderUrl($location);
-        echo '<url>';
-        echo '<loc>'.htmlspecialchars($location).'</loc>';
-
+		echo '<url>';
+		$location = \TYPO3\CMS\Core\Utility\GeneralUtility::locationHeaderUrl(
+			$page['_OVERRIDE_HREF'] ? 
+			$page['_OVERRIDE_HREF'] : //if: _OVERRIDE_HREF is used -> use it 
+			htmlspecialchars($this->cObj->typoLink('', array( // else: generate url
+				'parameter' => $page['uid'],
+				'returnLast' => 'url',
+			)))
+		);
+		echo '<loc>'.$location.'</loc>';
 		if($page['SYS_LASTCHANGED'] && $page['SYS_LASTCHANGED'] > 86400) {
 			echo '<lastmod>'.date('c', $page['SYS_LASTCHANGED']).'</lastmod>';
 		}
@@ -213,8 +218,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 			if(substr($name, -1) === '.') {
 				continue;
 			}
-			$generator = t3lib_div::makeInstance((string)$class);
-			$generator->init($this->config[$name.'.'] ? $this->config[$name.'.'] : array(), $this, $this->cObj);
+			$generator = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance((string)$class);
 			
 			if(!$generator instanceof Tx_ExtensibleSitemap_Generator_Interface) {
 				$this->throwError(500, sprintf('"%s" is no instance of Tx_ExtensibleSitemap_Generator_Interface', get_class($generator)));
@@ -292,11 +296,11 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 	 */
 	protected function initTSFE() {
 		if (version_compare(TYPO3_version, '4.3.0', '<')) {
-			$tsfeClassName = t3lib_div::makeInstanceClassName('tslib_fe');
-			$GLOBALS['TSFE'] = new $tsfeClassName($GLOBALS['TYPO3_CONF_VARS'], t3lib_div::_GP('id'), '');
+			$tsfeClassName = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tslib_fe');
+			$GLOBALS['TSFE'] = new $tsfeClassName($GLOBALS['TYPO3_CONF_VARS'],\TYPO3\CMS\Core\Utility\GeneralUtility::_GP('id'), '');
 		}
 		else {
-			$GLOBALS['TSFE'] = t3lib_div::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], t3lib_div::_GP('id'), '');
+			$GLOBALS['TSFE'] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('id'), '');
 		}
 		$GLOBALS['TSFE']->connectToDB();
 		$GLOBALS['TSFE']->initFEuser();
@@ -307,7 +311,7 @@ class Tx_ExtensibleSitemap_Controller_Eid {
 		$GLOBALS['TSFE']->getConfigArray();
 
 		// Get linkVars, absRefPrefix, etc
-		TSpagegen::pagegenInit();
+		\TYPO3\CMS\Frontend\Page\PageGenerator::pagegenInit();
 	}
 }
 ?>
